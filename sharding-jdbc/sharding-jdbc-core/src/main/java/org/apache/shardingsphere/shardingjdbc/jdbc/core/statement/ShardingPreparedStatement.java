@@ -107,8 +107,17 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
         ResultSet result;
         try {
             clearPrevious();
+            /*
+                处理分片及优化sql
+             */
             shard();
+            /*
+                初始化预编译sql
+             */
             initPreparedStatementExecutor();
+            /*
+                合并查询结果
+             */
             MergeEngine mergeEngine = MergeEngineFactory.newInstance(connection.getRuntimeContext().getDatabaseType(), 
                     connection.getRuntimeContext().getRule(), sqlRouteResult, connection.getRuntimeContext().getMetaData().getTable(), preparedStatementExecutor.executeQuery());
             result = getResultSet(mergeEngine);

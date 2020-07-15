@@ -74,7 +74,7 @@ public final class ParsingSQLRouter implements ShardingRouter {
          */
         OptimizedStatement optimizedStatement = ShardingOptimizeEngineFactory.newInstance(sqlStatement).optimize(shardingRule, shardingMetaData.getTable(), logicSQL, parameters, sqlStatement);
         /*
-            判断是否需要分片
+            判断是否需要对分片数据进行聚合
          */
         boolean needMergeShardingValues = isNeedMergeShardingValues(optimizedStatement);
         if (optimizedStatement instanceof ShardingConditionOptimizedStatement && needMergeShardingValues) {
@@ -100,7 +100,13 @@ public final class ParsingSQLRouter implements ShardingRouter {
             optimizedStatement.getGeneratedKey().get().getGeneratedValues().addAll(generatedValues);
         }
     }
-    
+
+    /**
+     * 判断是否对分片结果进行合并
+     * @param optimizedStatement 优化后的结果
+     * @return 判断是否对分片结果进行合并
+     *
+     */
     private boolean isNeedMergeShardingValues(final OptimizedStatement optimizedStatement) {
         return optimizedStatement instanceof ShardingSelectOptimizedStatement && ((ShardingSelectOptimizedStatement) optimizedStatement).isContainsSubquery() 
                 && !shardingRule.getShardingLogicTableNames(optimizedStatement.getTables().getTableNames()).isEmpty();
